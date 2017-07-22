@@ -1,6 +1,9 @@
 package com.vishnu.android.reminder.Real;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +23,9 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import com.vishnu.android.reminder.R;
+import com.vishnu.android.reminder.Real.db.ReminderDataBase;
+import com.vishnu.android.reminder.testingmodule.alarm.AlarmReciever;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,7 +37,7 @@ import java.util.Calendar;
 public class NewDailyRoutine extends AppCompatActivity implements View.OnClickListener {
     private ImageView                   mImgViewClock, mImgViewChooseImage, mImgViewChooseMusic, mImgViewResultImage, mImgViewSave;
     private TextView                    mTxtViewShowTime, mTxtViewImageUri;
-    private final int                   PICK_IMAGE_REQUEST    =   1;
+    private final int                   PICK_IMAGE_REQUEST    =   1, CHOOSE_RINGTONE_REQUEST    =   2;
     private Button                      mBtnSn, mBtnMn, mBtnwd, mBtnTu, mBtnTh, mBtnFr, mBtnSa;
     private int[]                       dateSelected ;
     private LinearLayout                mLinearTimeContainer;
@@ -42,6 +48,8 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
     private TimeGridAdapter             timeGridAdapter;
     private EditText                    mEdtTxtName, mEdtTxtDescription;
     private String                      mImageUriString= "temp", mRingToneUriString= "temp";
+    private AlarmManager                mAlarmManager;
+    private PendingIntent               mAlarmIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +126,7 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.img_view_music:
                 Intent intent   =   new Intent(this, SelectRingtone.class);
-                startActivity(intent);
+                startActivityForResult(intent, CHOOSE_RINGTONE_REQUEST);
                 break;
             case R.id.btn_sun:
                 selectUnselectDate(0, mBtnSn);
@@ -258,6 +266,10 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
 
             }
         }
+        else if(requestCode ==  CHOOSE_RINGTONE_REQUEST && resultCode   ==  RESULT_OK && resultIntent != null){
+            mRingToneUriString      =   resultIntent.getStringExtra("ringtone_uri").toString();
+            mEdtTxtName.setText(mRingToneUriString);
+        }
     }
     public String saveImageFile(Bitmap bitmap) {
         FileOutputStream out ;
@@ -329,11 +341,29 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
                     int day =   calendar.get(Calendar.DATE);
                     day++;
                     alarmCalenderList.add(calendar);
+                    alarmCalenderModel.setmCalenderArrayList(alarmCalenderList);
+                    alarmCalenderModel.setmAlarmDescription(mEdtTxtDescription.getText().toString());
+                    alarmCalenderModel.setmAlarmName(mEdtTxtName.getText().toString());
+                    alarmCalenderModel.setmImageUri(mImageUriString);
+                    alarmCalenderModel.setmRingtonUri(mRingToneUriString);
+                    long alarmId =   ReminderDataBase.getInstance(this).insertAlarm(alarmCalenderModel );
+                    setCalenderTime(calendar, alarmId);
                 }
-                alarmCalenderModel.setmCalenderArrayList(alarmCalenderList);
             }else {}
         }
     }
+    public void setCalenderTime(Calendar calender, long id){
+        Integer alarmId     =    (int)(long) id;
+        mAlarmManager       =   (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent       =   new Intent(getApplicationContext(), AlarmReciever.class);
+        intent.putExtra("id", Integer.toString(alarmId));
+        mAlarmIntent        =   PendingIntent.getBroadcast(getApplicationContext(),alarmId, intent, 0);
+        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calender.getTimeInMillis(),  1000 * 60 * 60 * 24, mAlarmIntent);
+        /*mAlarmManager.set(AlarmManager.RTC_WAKEUP, calender.getTimeInMillis(), mAlarmIntent);*/
+        Toast.makeText(this, ReminderDataBase.getInstance(this).getTables(), Toast.LENGTH_LONG).show();
+    }
+    public void   insertAlarm(AlarmCalenderDbModel alarmCalenderDbModels, Context context){
 
+    }
 
 }

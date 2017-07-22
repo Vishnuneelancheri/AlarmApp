@@ -31,7 +31,8 @@
 
         <activity android:name=".Real.DailyRoutineActivity" />
         <activity android:name=".Real.NewDailyRoutine" />
-        <activity android:name=".Real.SelectRingtone"></activity>
+        <activity android:name=".Real.SelectRingtone" />
+        <activity android:name=".Real.AlertAlarm"></activity>
     </application>
 
 </manifest>
