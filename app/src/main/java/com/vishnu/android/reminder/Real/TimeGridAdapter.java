@@ -83,7 +83,7 @@ public class TimeGridAdapter extends BaseAdapter{
 
         }
         else
-            view                =   (View) converterView;
+            view                = converterView;
         return view;
     }
 

@@ -73,6 +73,7 @@ public class SelectRingtone extends AppCompatActivity implements View.OnClickLis
         if (view.getId()    ==  R.id.btn_ringtone_choose){
             Intent  ringtoneData    =   new Intent();
             ringtoneData.putExtra("ringtone_uri", alarmUriList.get(ringtonePosition).toString());
+            ringtoneData.putExtra("ringtone_name", uris[ringtonePosition].toString());
             setResult(RESULT_OK, ringtoneData);
             finish();
         }

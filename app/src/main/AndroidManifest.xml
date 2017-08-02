@@ -32,7 +32,8 @@
         <activity android:name=".Real.DailyRoutineActivity" />
         <activity android:name=".Real.NewDailyRoutine" />
         <activity android:name=".Real.SelectRingtone" />
-        <activity android:name=".Real.AlertAlarm"></activity>
+        <activity android:name=".Real.AlertAlarm"
+            android:showOnLockScreen="true"></activity>
     </application>
 
 </manifest>

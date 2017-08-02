@@ -30,20 +30,24 @@ public class AlertAlarm extends AppCompatActivity {
         Intent intent   =   getIntent();
         String alarmId  =   intent.getStringExtra("id");
 
-        ShowAlarmModel  showAlarmModel  = ReminderDataBase.getInstance(this).getAlarmData(alarmId);
+        ShowAlarmModel  showAlarmModel  = ReminderDataBase.getInstance(this).getAlarmDataForAlert(alarmId);
         if (showAlarmModel != null){
             mTxtViewvAlarmName.setText(showAlarmModel.getmAlarmName());
             mTxtViewvAlarmDescription.setText(showAlarmModel.getmAlarmDescription());
             mTxtViewImageUri.setText(showAlarmModel.getmAlarmImageUri());
             mTxtViewRingtoneUri.setText(showAlarmModel.getmAlarmRingtoneUri());
 
-            Uri imageUri    =   Uri.parse(showAlarmModel.getmAlarmImageUri());
-            mImageViewShowContent.setImageURI(imageUri);
+            try{
+                Uri imageUri    =   Uri.parse(showAlarmModel.getmAlarmImageUri());
+                mImageViewShowContent.setImageURI(imageUri);
 
-            Uri ringtoneUri =   Uri.parse(showAlarmModel.getmAlarmRingtoneUri());
-            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), ringtoneUri);
+                Uri ringtoneUri =   Uri.parse(showAlarmModel.getmAlarmRingtoneUri());
+                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), ringtoneUri);
 
-            r.play();
+                r.play();
+            }catch (Exception e){
+                
+            }
         }
     }
     @Override

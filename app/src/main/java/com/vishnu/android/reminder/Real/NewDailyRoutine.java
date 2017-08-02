@@ -36,7 +36,7 @@ import java.util.Calendar;
 
 public class NewDailyRoutine extends AppCompatActivity implements View.OnClickListener {
     private ImageView                   mImgViewClock, mImgViewChooseImage, mImgViewChooseMusic, mImgViewResultImage, mImgViewSave;
-    private TextView                    mTxtViewShowTime, mTxtViewImageUri;
+    private TextView                    mTxtViewShowTime, mTxtViewImageUri, mTxtViewRingToneUri;
     private final int                   PICK_IMAGE_REQUEST    =   1, CHOOSE_RINGTONE_REQUEST    =   2;
     private Button                      mBtnSn, mBtnMn, mBtnwd, mBtnTu, mBtnTh, mBtnFr, mBtnSa;
     private int[]                       dateSelected ;
@@ -82,7 +82,7 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
         mBtnSa.setOnClickListener(this);
         mEdtTxtDescription      =   (EditText)      findViewById(R.id.edt_txt_alarm_description);
         mEdtTxtName             =   (EditText)      findViewById(R.id.edt_txt_alarm_name);
-
+        mTxtViewRingToneUri     =   (TextView)      findViewById(R.id.textView8);
         dateSelected            =   new int[7];
 
         for (int i = 0; i < dateSelected.length; i++){
@@ -150,7 +150,9 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
                 selectUnselectDate(6, mBtnSa);
                 break;
             case R.id.img_view_save:
-                gatherAlldata();
+                /*gatherAlldata();*/
+                recieveAllData();
+                break;
         }
     }
     public void selectUnselectDate(int position, Button btn){
@@ -268,7 +270,8 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
         }
         else if(requestCode ==  CHOOSE_RINGTONE_REQUEST && resultCode   ==  RESULT_OK && resultIntent != null){
             mRingToneUriString      =   resultIntent.getStringExtra("ringtone_uri").toString();
-            mEdtTxtName.setText(mRingToneUriString);
+            mTxtViewImageUri.setText(mRingToneUriString);
+            mTxtViewRingToneUri.setText(resultIntent.getStringExtra("ringtone_name").toString());
         }
     }
     public String saveImageFile(Bitmap bitmap) {
@@ -346,7 +349,52 @@ public class NewDailyRoutine extends AppCompatActivity implements View.OnClickLi
                     alarmCalenderModel.setmAlarmName(mEdtTxtName.getText().toString());
                     alarmCalenderModel.setmImageUri(mImageUriString);
                     alarmCalenderModel.setmRingtonUri(mRingToneUriString);
-                    long alarmId =   ReminderDataBase.getInstance(this).insertAlarm(alarmCalenderModel );
+                    long alarmId =   ReminderDataBase.getInstance(this).insertAlarmDetails(alarmCalenderModel );
+                    setCalenderTime(calendar, alarmId);
+                }
+            }else {}
+        }
+    }
+    public void recieveAllData(){
+        AlarmCalenderDbModel alarmCalenderDbModel   =   new AlarmCalenderDbModel();
+        alarmCalenderDbModel.setmImageUri(mImageUriString);
+        alarmCalenderDbModel.setmRingtonUri(mRingToneUriString);
+        alarmCalenderDbModel.setmAlarmName(mEdtTxtName.getText().toString());
+        alarmCalenderDbModel.setmAlarmName(mEdtTxtDescription.getText().toString());
+        long alarmDescriptionId =   ReminderDataBase.getInstance(this).insertAlarmDetails(alarmCalenderDbModel);
+
+        Calendar calendar   =   Calendar.getInstance();
+        for (int i  =   0; i    < dateSelected.length; i++){
+            if (dateSelected[i] == 1){
+                switch (i){
+                    case 0:
+                        calendar.set(Calendar.DATE, Calendar.SUNDAY);
+                        break;
+                    case 1:
+                        calendar.set(Calendar.DATE, Calendar.MONDAY);
+                        break;
+                    case 2:
+                        calendar.set(Calendar.DATE, Calendar.TUESDAY);
+                        break;
+                    case 3:
+                        calendar.set(Calendar.DATE, Calendar.WEDNESDAY);
+                        break;
+                    case 4:
+                        calendar.set(Calendar.DATE, Calendar.THURSDAY);
+                        break;
+                    case 5:
+                        calendar.set(Calendar.DATE, Calendar.FRIDAY);
+                        break;
+                    case 6:
+                        calendar.set(Calendar.DATE, Calendar.SATURDAY);
+                        break;
+                }
+                for (int j=0; j<mAlarmModelArray.size()-1; j++){
+                    calendar.set(Calendar.HOUR_OF_DAY, mAlarmModelArray.get(j).getMcalender().get(Calendar.HOUR_OF_DAY));
+                    int temp    =   calendar.get(Calendar.MINUTE);
+                    int day =   calendar.get(Calendar.DATE);
+                    day++;
+                    long alarmId = ReminderDataBase.getInstance(this).insertAlarmTimeWithId(Long.toString(alarmDescriptionId), calendar.get(Calendar.DAY_OF_WEEK));
                     setCalenderTime(calendar, alarmId);
                 }
             }else {}

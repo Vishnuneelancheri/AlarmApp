@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
-import com.vishnu.android.reminder.MainActivity;
 import com.vishnu.android.reminder.R;
 import com.vishnu.android.reminder.Real.AlertAlarm;
 
